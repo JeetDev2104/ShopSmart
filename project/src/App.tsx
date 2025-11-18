@@ -288,7 +288,7 @@ function App() {
           >
             <Sparkles className="w-16 h-16 mx-auto" />
           </motion.div>
-          <h1 className="text-4xl font-bold mb-2">ShopSmart AI</h1>
+          <h1 className="text-4xl font-bold mb-2">WalSmart AI</h1>
           <p className="text-xl opacity-90">
             Your Intelligent Shopping Assistant
           </p>

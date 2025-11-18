@@ -96,7 +96,7 @@ const AISearchLoader: React.FC<AISearchLoaderProps> = ({ query }) => {
           transition={{ delay: 0.3 }}
           className="mb-8"
         >
-          <h2 className="text-3xl font-bold text-white mb-2">ShopSmart AI is thinking...</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">WalSmart AI is thinking...</h2>
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
             <p className="text-white/90 text-lg">
               "<span className="text-blue-300 font-medium">{query}</span>"

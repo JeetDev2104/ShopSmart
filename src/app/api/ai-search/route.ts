@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { aiProductSearch } from "../../actions";
+import { products } from "@/lib/data";
 
 export async function POST(req: NextRequest) {
   const { query } = await req.json();
@@ -9,6 +9,31 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  const products = await aiProductSearch(query);
-  return NextResponse.json({ products });
+
+  // Call Python AI search for product names/keywords
+  const pyResp = await fetch("http://localhost:8000/ai-search", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+
+  if (!pyResp.ok) {
+    const detail = await pyResp.text();
+    return NextResponse.json(
+      { error: "AI service error", detail },
+      { status: 502 }
+    );
+  }
+
+  const data = await pyResp.json();
+  const names: string[] = Array.isArray(data?.productNames)
+    ? data.productNames
+    : [];
+
+  // Map names to local product objects (case-insensitive contains match on name)
+  const matched = products.filter((p) =>
+    names.some((n) => p.name.toLowerCase().includes(String(n).toLowerCase()))
+  );
+
+  return NextResponse.json({ products: matched });
 }
