@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, CreditCard, Check, Package, Truck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, CreditCard, Check, Package, Truck, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartItem } from '../types';
 
@@ -9,6 +9,7 @@ interface CheckoutFlowProps {
   items: CartItem[];
   totalPrice: number;
   onOrderComplete: () => void;
+  isAgentic?: boolean;
 }
 
 const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
@@ -16,16 +17,59 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
   onClose,
   items,
   totalPrice,
-  onOrderComplete
+  onOrderComplete,
+  isAgentic = false
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Form states for autofill animation
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
 
   const steps = [
     { icon: CreditCard, title: 'Payment Details', description: 'Enter your payment information' },
     { icon: Package, title: 'Order Processing', description: 'We\'re preparing your order' },
     { icon: Truck, title: 'Order Confirmed', description: 'Your order has been placed successfully' }
   ];
+
+  // Agentic Workflow Automation
+  useEffect(() => {
+    if (isOpen && isAgentic && currentStep === 0) {
+      const automateCheckout = async () => {
+        // Wait a bit before starting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Simulate typing card number
+        const targetCard = "4532 1234 5678 9012";
+        for (let i = 0; i <= targetCard.length; i++) {
+          setCardNumber(targetCard.slice(0, i));
+          await new Promise(r => setTimeout(r, 50));
+        }
+
+        // Simulate typing expiry
+        const targetExpiry = "12/28";
+        for (let i = 0; i <= targetExpiry.length; i++) {
+          setExpiry(targetExpiry.slice(0, i));
+          await new Promise(r => setTimeout(r, 100));
+        }
+
+        // Simulate typing CVV
+        const targetCvv = "123";
+        for (let i = 0; i <= targetCvv.length; i++) {
+          setCvv(targetCvv.slice(0, i));
+          await new Promise(r => setTimeout(r, 100));
+        }
+
+        // Wait then submit
+        await new Promise(resolve => setTimeout(resolve, 800));
+        handlePayment();
+      };
+
+      automateCheckout();
+    }
+  }, [isOpen, isAgentic, currentStep]);
 
   const handlePayment = async () => {
     setIsProcessing(true);
@@ -44,7 +88,11 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
       onClose();
       setCurrentStep(0);
       setIsProcessing(false);
-    }, 2000);
+      // Reset form
+      setCardNumber("");
+      setExpiry("");
+      setCvv("");
+    }, 4000); // Longer delay at the end to read the success message
   };
 
   if (!isOpen) return null;
@@ -61,13 +109,20 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className={`bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative overflow-hidden ${isAgentic ? 'border-2 border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b">
+        {isAgentic && (
+          <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-bold py-1 px-4 flex items-center justify-center gap-2">
+            <Sparkles className="w-3 h-3 animate-pulse" />
+            AGENTIC MODE ACTIVE: AUTOMATING CHECKOUT
+          </div>
+        )}
+
+        <div className="p-6 border-b mt-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900">Checkout</h2>
-            {currentStep < 2 && (
+            {currentStep < 2 && !isAgentic && (
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -163,8 +218,11 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
                     </label>
                     <input
                       type="text"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
                       placeholder="1234 5678 9012 3456"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${isAgentic ? 'bg-blue-50 border-blue-200 text-blue-800' : 'border-gray-300'}`}
+                      readOnly={isAgentic}
                     />
                   </div>
                   
@@ -175,8 +233,11 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
                       </label>
                       <input
                         type="text"
+                        value={expiry}
+                        onChange={(e) => setExpiry(e.target.value)}
                         placeholder="MM/YY"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${isAgentic ? 'bg-blue-50 border-blue-200 text-blue-800' : 'border-gray-300'}`}
+                        readOnly={isAgentic}
                       />
                     </div>
                     <div>
@@ -185,20 +246,34 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
                       </label>
                       <input
                         type="text"
+                        value={cvv}
+                        onChange={(e) => setCvv(e.target.value)}
                         placeholder="123"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 ${isAgentic ? 'bg-blue-50 border-blue-200 text-blue-800' : 'border-gray-300'}`}
+                        readOnly={isAgentic}
                       />
                     </div>
                   </div>
 
                   <motion.button
                     onClick={handlePayment}
-                    disabled={isProcessing}
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    disabled={isProcessing || (isAgentic && isProcessing)}
+                    className={`w-full py-3 rounded-lg font-semibold transition-colors ${
+                      isAgentic 
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    } disabled:opacity-50`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {isProcessing ? 'Processing...' : `Pay ₹${totalPrice.toFixed(2)}`}
+                    {isProcessing ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Sparkles className="w-4 h-4 animate-spin" />
+                        AI Processing...
+                      </span>
+                    ) : (
+                      `Pay ₹${totalPrice.toFixed(2)}`
+                    )}
                   </motion.button>
                 </div>
               </motion.div>

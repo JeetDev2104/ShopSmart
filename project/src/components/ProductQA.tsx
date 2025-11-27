@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "../types";
 import { GeminiService } from "../services/geminiService";
 import ReactMarkdown from 'react-markdown';
+import { useTTS } from "../hooks/useTTS";
 
 interface ProductQAProps {
   product: Product;
@@ -27,6 +28,7 @@ const ProductQA: React.FC<ProductQAProps> = ({ product, onClose }) => {
   const [hasSpeechSupport, setHasSpeechSupport] = useState(false);
   const recognitionRef = useRef<any>(null);
   const lastInputWasVoice = useRef(false);
+  const { speak } = useTTS();
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -110,9 +112,7 @@ const ProductQA: React.FC<ProductQAProps> = ({ product, onClose }) => {
         }
         if (lastInputWasVoice.current) {
           try {
-            const utter = new SpeechSynthesisUtterance(response.answer);
-            utter.lang = 'en-IN';
-            window.speechSynthesis.speak(utter);
+            speak(response.answer);
           } catch (err) {
             console.error('TTS error', err);
           }

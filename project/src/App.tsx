@@ -12,6 +12,7 @@ import CheckoutFlow from "./components/CheckoutFlow";
 import RecommendationPanel from "./components/RecommendationPanel";
 import RecipeShoppingList from "./components/RecipeShoppingList";
 import AISearchLoader from "./components/AISearchLoader";
+import AgenticPopup from "./components/AgenticPopup";
 import { useCart } from "./hooks/useCart";
 // import { products } from "./data/products"; // Removed static import
 import { Product, SearchIntent, RecipeDetails } from "./types";
@@ -33,6 +34,10 @@ function App() {
   // Indicates whether the user has performed at least one search during the current session
   const [hasSearched, setHasSearched] = useState(false);
   const [recipeDetails, setRecipeDetails] = useState<RecipeDetails | null>(null);
+  
+  // Agentic Workflow State
+  const [showAgenticPopup, setShowAgenticPopup] = useState(false);
+  const [isAgenticMode, setIsAgenticMode] = useState(false);
 
   const {
     cartItems,
@@ -76,6 +81,7 @@ function App() {
     setIsSearching(true);
     setHasSearched(true);
     setSearchHistory(prev => [...prev, query]);
+    setShowAgenticPopup(false); // Reset popup state
 
     try {
       // Show loading for at least 4 seconds to display the full animation
@@ -88,6 +94,11 @@ function App() {
         if (intent.type === "recipe") {
           const details = await geminiService.getRecipeDetails(query);
           setRecipeDetails(details);
+          
+          // Trigger Agentic Popup for recipe searches
+          setTimeout(() => {
+            setShowAgenticPopup(true);
+          }, 2000);
         } else {
           setRecipeDetails(null);
         }
@@ -285,6 +296,7 @@ function App() {
     setSelectedProduct(null); // Ensure no product detail is open
     setCurrentSearchQuery(""); // Reset the search box and state
     setHasSearched(false); // Redirect to home by resetting search state
+    setIsAgenticMode(false); // Reset agentic mode
   };
 
   const handleProductClick = (product: Product) => {
@@ -302,6 +314,24 @@ function App() {
     setSelectedProduct(null);
     // Open checkout directly
     openCheckout();
+  };
+
+  // Agentic Workflow Handlers
+  const handleAgenticStart = () => {
+    setShowAgenticPopup(false);
+    setIsAgenticMode(true);
+    
+    // Add all found items to cart
+    if (searchResults.length > 0) {
+      searchResults.forEach((product) => addToCart(product, 1));
+    }
+    
+    // Open checkout immediately
+    openCheckout();
+  };
+
+  const handleAgenticCancel = () => {
+    setShowAgenticPopup(false);
   };
 
   // Show AI Search Loading
@@ -374,6 +404,7 @@ function App() {
                   setSelectedProduct(null);
                   setCurrentSearchQuery("");
                   setHasSearched(false);
+                  setShowAgenticPopup(false);
                 }}
                 className="hover:opacity-80 transition-opacity"
                 aria-label="Return to home"
@@ -601,13 +632,24 @@ function App() {
         {isCheckoutOpen && (
           <CheckoutFlow
             isOpen={isCheckoutOpen}
-            onClose={closeCheckout}
+            onClose={() => {
+              closeCheckout();
+              setIsAgenticMode(false);
+            }}
             items={cartItems}
             totalPrice={getTotalPrice()}
             onOrderComplete={handleOrderComplete}
+            isAgentic={isAgenticMode}
           />
         )}
       </AnimatePresence>
+
+      {/* Agentic Popup */}
+      <AgenticPopup
+        isOpen={showAgenticPopup}
+        onConfirm={handleAgenticStart}
+        onCancel={handleAgenticCancel}
+      />
     </div>
   );
 }
