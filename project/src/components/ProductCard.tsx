@@ -41,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onProdu
     <>
       <motion.div
         layout
-        className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer ${
+        className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer ${
           isAnimatingToChat ? 'z-50' : ''
         }`}
         whileHover={!isAnimatingToChat ? { y: -5 } : {}}
@@ -86,17 +86,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, onProdu
         <div className="p-4">
           <div className="flex items-start justify-between mb-2">
             <div>
-              <h3 className="font-semibold text-lg text-gray-900">{product.name}</h3>
-              <p className="text-gray-600 text-sm mt-1">{product.description}</p>
+              <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{product.name}</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{product.description}</p>
             </div>
-            <span className="text-2xl font-bold text-blue-600">₹{product.price}</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">₹{product.price}</span>
           </div>
 
           <div className="flex flex-wrap gap-1 mb-3">
             {product.tags?.slice(0, 3).map((tag, index) => (
               <span
                 key={index}
-                className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+                className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs"
               >
                 {tag}
               </span>

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { X, CreditCard, Check, Package, Truck, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, CreditCard, Check, Package, Truck, Sparkles, Mic, Play, PauseCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartItem } from '../types';
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 
 interface CheckoutFlowProps {
   isOpen: boolean;
@@ -22,11 +23,15 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   
   // Form states for autofill animation
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
+
+  const { isListening, transcript, startListening, stopListening, supported: speechSupported } = useSpeechRecognition();
+  const automationRef = useRef<boolean>(true); // Ref to control loop interruption
 
   const steps = [
     { icon: CreditCard, title: 'Payment Details', description: 'Enter your payment information' },
@@ -34,16 +39,42 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
     { icon: Truck, title: 'Order Confirmed', description: 'Your order has been placed successfully' }
   ];
 
+  // Voice Control Logic
+  useEffect(() => {
+    if (isOpen && isAgentic && !isPaused) {
+      startListening();
+    } else {
+      stopListening();
+    }
+  }, [isOpen, isAgentic, isPaused, startListening, stopListening]);
+
+  useEffect(() => {
+    if (transcript) {
+      const lower = transcript.toLowerCase();
+      if (lower.includes('cancel') || lower.includes('stop') || lower.includes('wait') || lower.includes('pause')) {
+        setIsPaused(true);
+        automationRef.current = false;
+      }
+    }
+  }, [transcript]);
+
   // Agentic Workflow Automation
   useEffect(() => {
-    if (isOpen && isAgentic && currentStep === 0) {
+    if (isOpen && isAgentic && currentStep === 0 && !isPaused) {
+      automationRef.current = true;
+      
       const automateCheckout = async () => {
+        // Helper to check if we should continue
+        const shouldContinue = () => automationRef.current && !isPaused;
+
         // Wait a bit before starting
         await new Promise(resolve => setTimeout(resolve, 1000));
+        if (!shouldContinue()) return;
 
         // Simulate typing card number
         const targetCard = "4532 1234 5678 9012";
         for (let i = 0; i <= targetCard.length; i++) {
+          if (!shouldContinue()) return;
           setCardNumber(targetCard.slice(0, i));
           await new Promise(r => setTimeout(r, 50));
         }
@@ -51,6 +82,7 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
         // Simulate typing expiry
         const targetExpiry = "12/28";
         for (let i = 0; i <= targetExpiry.length; i++) {
+          if (!shouldContinue()) return;
           setExpiry(targetExpiry.slice(0, i));
           await new Promise(r => setTimeout(r, 100));
         }
@@ -58,18 +90,29 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
         // Simulate typing CVV
         const targetCvv = "123";
         for (let i = 0; i <= targetCvv.length; i++) {
+          if (!shouldContinue()) return;
           setCvv(targetCvv.slice(0, i));
           await new Promise(r => setTimeout(r, 100));
         }
 
         // Wait then submit
         await new Promise(resolve => setTimeout(resolve, 800));
+        if (!shouldContinue()) return;
         handlePayment();
       };
 
       automateCheckout();
     }
-  }, [isOpen, isAgentic, currentStep]);
+  }, [isOpen, isAgentic, currentStep, isPaused]); // Re-run when isPaused changes to false (Resume)
+
+  const handleResume = () => {
+    setIsPaused(false);
+    automationRef.current = true;
+    // Reset fields to restart animation cleanly or just continue (simple restart for now)
+    setCardNumber("");
+    setExpiry("");
+    setCvv("");
+  };
 
   const handlePayment = async () => {
     setIsProcessing(true);
@@ -92,7 +135,7 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
       setCardNumber("");
       setExpiry("");
       setCvv("");
-    }, 4000); // Longer delay at the end to read the success message
+    }, 4000); 
   };
 
   if (!isOpen) return null;
@@ -109,28 +152,72 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className={`bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative overflow-hidden ${isAgentic ? 'border-2 border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : ''}`}
+        className={`bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative overflow-hidden transition-colors duration-200 ${isAgentic ? 'border-2 border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         {isAgentic && (
-          <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-bold py-1 px-4 flex items-center justify-center gap-2">
-            <Sparkles className="w-3 h-3 animate-pulse" />
-            AGENTIC MODE ACTIVE: AUTOMATING CHECKOUT
+          <div className={`absolute top-0 left-0 right-0 text-white text-xs font-bold py-1 px-4 flex items-center justify-center gap-2 transition-colors duration-300 ${isPaused ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-purple-600'}`}>
+            {isPaused ? (
+              <>
+                <PauseCircle className="w-3 h-3" />
+                CHECKOUT PAUSED - SAY "RESUME" OR CLICK BELOW
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3 h-3 animate-pulse" />
+                AGENTIC MODE ACTIVE: SAY "STOP" TO PAUSE
+                {isListening && <Mic className="w-3 h-3 animate-pulse ml-2" />}
+              </>
+            )}
           </div>
         )}
 
-        <div className="p-6 border-b mt-4">
+        <div className="p-6 border-b dark:border-gray-700 mt-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">Checkout</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Checkout</h2>
             {currentStep < 2 && !isAgentic && (
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             )}
           </div>
+
+          {/* Paused Overlay */}
+          <AnimatePresence>
+            {isPaused && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4 mt-4"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <PauseCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                  <div>
+                    <h3 className="font-bold text-red-700 dark:text-red-300">Checkout Paused</h3>
+                    <p className="text-sm text-red-600 dark:text-red-400">Automation stopped by voice command.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleResume}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-2"
+                  >
+                    <Play className="w-4 h-4" /> Resume
+                  </button>
+                  <button
+                    onClick={onClose}
+                    className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-2 rounded-lg text-sm font-semibold"
+                  >
+                    Cancel Order
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Progress Bar */}
           <div className="mt-6">
@@ -146,7 +233,7 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
                       className={`w-10 h-10 rounded-full flex items-center justify-center ${
                         isCompleted ? 'bg-green-500 text-white' :
                         isActive ? 'bg-blue-600 text-white' :
-                        'bg-gray-200 text-gray-500'
+                        'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                       }`}
                       animate={{
                         scale: isActive ? 1.2 : 1,
@@ -158,7 +245,7 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
                     </motion.div>
                     {index < steps.length - 1 && (
                       <div className={`w-16 h-0.5 mx-2 ${
-                        index < currentStep ? 'bg-green-500' : 'bg-gray-200'
+                        index < currentStep ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
                       }`} />
                     )}
                   </div>
@@ -167,8 +254,8 @@ const CheckoutFlow: React.FC<CheckoutFlowProps> = ({
             </div>
             
             <div className="text-center">
-              <h3 className="font-semibold">{steps[currentStep].title}</h3>
-              <p className="text-gray-600 text-sm">{steps[currentStep].description}</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">{steps[currentStep].title}</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">{steps[currentStep].description}</p>
             </div>
           </div>
         </div>

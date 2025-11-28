@@ -53,10 +53,10 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-white z-50 overflow-y-auto"
+      className="fixed inset-0 bg-white dark:bg-gray-900 z-50 overflow-y-auto transition-colors duration-200"
     >
       {/* Header */}
-      <div className="sticky top-0 bg-blue-600 border-b z-10">
+      <div className="sticky top-0 bg-blue-600 dark:bg-blue-800 border-b dark:border-blue-700 z-10 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
@@ -71,8 +71,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             
             <div className="flex items-center gap-2">
               <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-              <span className="font-medium">{(sentimentScore / 20).toFixed(1)}</span>
-              <span className="text-white">({currentSentiment.positive + currentSentiment.negative} reviews)</span>
+              <span className="font-medium text-white">{(sentimentScore / 20).toFixed(1)}</span>
+              <span className="text-white/80">({currentSentiment.positive + currentSentiment.negative} reviews)</span>
             </div>
           </div>
         </div>
@@ -88,7 +88,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             transition={{ delay: 0.2 }}
             className="lg:col-span-1 space-y-4"
           >
-            <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden">
+            <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden">
               <img
                 src={product.image}
                 alt={product.name}
@@ -101,7 +101,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               {product.tags?.slice(0, 6).map((tag, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium"
                 >
                   {tag}
                 </span>
@@ -117,28 +117,28 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             className="lg:col-span-1 space-y-6"
           >
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-                  <p className="text-2xl font-bold text-gray-900 mb-4">₹{product.price}</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{product.name}</h1>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white mb-4">₹{product.price}</p>
             </div>
 
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
               {product.longDescription}
             </p>
 
             {/* Quantity Selector */}
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-700">Quantity:</span>
-              <div className="flex items-center border border-gray-300 rounded-lg">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Quantity:</span>
+              <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-2 hover:bg-gray-100 transition-colors"
+                  className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
                 >
                   -
                 </button>
-                <span className="px-4 py-2 border-x border-gray-300">{quantity}</span>
+                <span className="px-4 py-2 border-x border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="px-3 py-2 hover:bg-gray-100 transition-colors"
+                  className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
                 >
                   +
                 </button>
@@ -180,6 +180,23 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 Know Me More
                 <Sparkles className="w-3 h-3" />
               </motion.button>
+
+              {/* Watch Video Button */}
+              {product.videoUrl && (
+                <motion.a
+                  href={product.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-2 px-4 rounded-full font-medium text-sm hover:from-red-700 hover:to-red-600 transition-all duration-300 flex items-center justify-center gap-2 shadow-md mt-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                  </svg>
+                  Watch Recipe Video
+                </motion.a>
+              )}
             </div>
           </motion.div>
 
@@ -190,37 +207,37 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             transition={{ delay: 0.4 }}
             className="lg:col-span-1"
           >
-            <div className="bg-gray-50 rounded-2xl p-6 sticky top-24">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Sentiment Summary</h2>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 sticky top-24 transition-colors duration-200">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Sentiment Summary</h2>
               
               {/* Overall Sentiment */}
               <div className="space-y-4 mb-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <ThumbsUp className="w-5 h-5 text-green-600" />
-                    <span className="font-semibold text-green-600">Positive</span>
+                    <ThumbsUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <span className="font-semibold text-green-600 dark:text-green-400">Positive</span>
                   </div>
-                  <span className="text-xl font-bold text-green-600">{currentSentiment.positive}%</span>
+                  <span className="text-xl font-bold text-green-600 dark:text-green-400">{currentSentiment.positive}%</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <ThumbsDown className="w-5 h-5 text-red-600" />
-                    <span className="font-semibold text-red-600">Negative</span>
+                    <ThumbsDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    <span className="font-semibold text-red-600 dark:text-red-400">Negative</span>
                   </div>
-                  <span className="text-xl font-bold text-red-600">{currentSentiment.negative}%</span>
+                  <span className="text-xl font-bold text-red-600 dark:text-red-400">{currentSentiment.negative}%</span>
                 </div>
               </div>
 
               {/* Aspect Ratings */}
               <div className="space-y-4 mb-6">
-                <h3 className="font-semibold text-gray-900">Detailed Ratings</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Detailed Ratings</h3>
                 {Object.entries(currentSentiment.aspects).map(([aspect, score]) => (
                   <div key={aspect} className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-gray-700 capitalize text-sm">{aspect}</span>
-                      <span className="font-bold text-gray-900">{score}%</span>
+                      <span className="font-medium text-gray-700 dark:text-gray-300 capitalize text-sm">{aspect}</span>
+                      <span className="font-bold text-gray-900 dark:text-white">{score}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <motion.div
                         className={`h-2 rounded-full ${
                           score >= 80 ? 'bg-green-600' : score >= 60 ? 'bg-yellow-500' : 'bg-red-500'
@@ -235,28 +252,28 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               </div>
 
               {/* AI Insight */}
-              <div className="bg-blue-50 rounded-xl p-4">
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-4 h-4 text-blue-600" />
-                  <h3 className="font-semibold text-blue-900 text-sm">AI Insights</h3>
+                  <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-300 text-sm">AI Insights</h3>
                 </div>
-                <p className="text-blue-800 text-sm leading-relaxed">{product.dataAiHint}</p>
+                <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed">{product.dataAiHint}</p>
               </div>
 
               {/* Write a Review Section */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h3 className="font-semibold text-gray-900 mb-3">Write a Review</h3>
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Write a Review</h3>
                 <textarea
                   value={reviewText}
                   onChange={(e) => setReviewText(e.target.value)}
                   placeholder="Share your experience..."
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm mb-3"
+                  className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm mb-3 placeholder-gray-400 dark:placeholder-gray-500"
                   rows={3}
                 />
                 <button
                   onClick={handleReviewSubmit}
                   disabled={isAnalyzing || !reviewText.trim()}
-                  className="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-gray-900 dark:bg-gray-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isAnalyzing ? (
                     <>

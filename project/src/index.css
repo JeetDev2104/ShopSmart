@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply transition-colors duration-200;
+  }
+}
+
 /* Custom gradient border animation */
 @keyframes gradient-x {
   0%, 100% {

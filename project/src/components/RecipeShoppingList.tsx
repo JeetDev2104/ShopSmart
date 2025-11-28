@@ -30,15 +30,32 @@ const RecipeShoppingList: React.FC<RecipeShoppingListProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl p-6 border border-orange-200 mb-8"
+      className="bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 border border-orange-200 dark:border-gray-700 mb-8 transition-colors duration-200"
     >
-      <div className="flex items-center gap-3 mb-4">
-        <ChefHat className="w-6 h-6 text-orange-600" />
-        <h3 className="text-2xl font-bold text-gray-900">Recipe Shopping List</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <ChefHat className="w-6 h-6 text-orange-600 dark:text-orange-500" />
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Recipe Shopping List</h3>
+        </div>
+
+        {/* Watch Recipe Video Button */}
+        <motion.a
+          href={`https://www.youtube.com/results?search_query=how+to+cook+${encodeURIComponent(recipeName)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-gradient-to-r from-red-600 to-red-500 text-white py-2 px-4 rounded-full font-medium text-sm hover:from-red-700 hover:to-red-600 transition-all duration-300 flex items-center justify-center gap-2 shadow-md"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+          </svg>
+          Watch Recipe Video
+        </motion.a>
       </div>
       
-      <p className="text-gray-700 mb-4">
-        Perfect ingredients for making <span className="font-semibold text-orange-700">{recipeName}</span>
+      <p className="text-gray-700 dark:text-gray-300 mb-4">
+        Perfect ingredients for making <span className="font-semibold text-orange-700 dark:text-orange-400">{recipeName}</span>
       </p>
 
       {recipeInstructions && (
@@ -61,7 +78,7 @@ const RecipeShoppingList: React.FC<RecipeShoppingListProps> = ({
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-lg p-4 shadow-sm border"
+            className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border dark:border-gray-700"
           >
             <div className="flex items-center gap-3">
               <img
@@ -70,12 +87,12 @@ const RecipeShoppingList: React.FC<RecipeShoppingListProps> = ({
                 className="w-12 h-12 object-cover rounded-lg"
               />
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-900">{ingredient.name}</h4>
-                <p className="text-orange-600 font-bold">₹{ingredient.price}</p>
+                <h4 className="font-semibold text-gray-900 dark:text-white">{ingredient.name}</h4>
+                <p className="text-orange-600 dark:text-orange-400 font-bold">₹{ingredient.price}</p>
               </div>
               <motion.button
                 onClick={() => onAddToCart(ingredient)}
-                className="p-2 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors"
+                className="p-2 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -86,10 +103,10 @@ const RecipeShoppingList: React.FC<RecipeShoppingListProps> = ({
         ))}
       </div>
 
-      <div className="flex items-center justify-between bg-white rounded-lg p-4 border-2 border-orange-200 mb-4">
+      <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-orange-200 dark:border-gray-700 mb-4">
         <div>
-          <p className="text-gray-600">Total for recipe ingredients:</p>
-          <p className="text-2xl font-bold text-orange-600">₹{totalPrice.toFixed(2)}</p>
+          <p className="text-gray-600 dark:text-gray-400">Total for recipe ingredients:</p>
+          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">₹{totalPrice.toFixed(2)}</p>
         </div>
         <motion.button
           onClick={onAddAllToCart}
@@ -103,7 +120,7 @@ const RecipeShoppingList: React.FC<RecipeShoppingListProps> = ({
       </div>
 
       {recipeInstructions && recipeInstructions.steps.length > 0 && (
-        <div className="bg-white rounded-lg p-4 border border-orange-200">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-orange-200 dark:border-gray-700">
           <button
             onClick={() => setShowInstructions(!showInstructions)}
             className="w-full flex items-center justify-between text-left"

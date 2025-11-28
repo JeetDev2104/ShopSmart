@@ -13,14 +13,17 @@ export const useSpeechRecognition = () => {
       if (SpeechRecognition) {
         setSupported(true);
         const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
+        recognition.continuous = true;
+        recognition.interimResults = true;
         recognition.lang = 'en-US';
 
         recognition.onstart = () => setIsListening(true);
         recognition.onend = () => setIsListening(false);
         recognition.onresult = (event: any) => {
-          const currentTranscript = event.results[0][0].transcript;
+          let currentTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            currentTranscript += event.results[i][0].transcript;
+          }
           setTranscript(currentTranscript);
         };
 

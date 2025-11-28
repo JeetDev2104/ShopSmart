@@ -20,7 +20,8 @@ export const products: Product[] = [
       }
     },
     dataAiHint: 'High-quality basmati rice with excellent cooking properties, highly rated for taste and texture',
-    tags: ['rice', 'basmati', 'grains', 'cooking', 'biryani', 'indian', 'aromatic']
+    tags: ['rice', 'basmati', 'grains', 'cooking', 'biryani', 'indian', 'aromatic'],
+    videoUrl: 'https://www.youtube.com/watch?v=1u2k2r2xR20'
   },
   {
     id: '2',
@@ -40,7 +41,8 @@ export const products: Product[] = [
       }
     },
     dataAiHint: 'Authentic soy sauce with excellent flavor profile, essential for Asian cooking',
-    tags: ['soy-sauce', 'condiment', 'asian', 'cooking', 'stir-fry', 'marinade', 'umami', 'fried-rice', 'chinese', 'wok']
+    tags: ['soy-sauce', 'condiment', 'asian', 'cooking', 'stir-fry', 'marinade', 'umami', 'fried-rice', 'chinese', 'wok'],
+    videoUrl: 'https://www.youtube.com/watch?v=1u2k2r2xR20'
   },
   {
     id: '3',
@@ -60,7 +62,8 @@ export const products: Product[] = [
       }
     },
     dataAiHint: 'Fresh quality onions, versatile cooking ingredient with good shelf life',
-    tags: ['onions', 'vegetables', 'cooking', 'fresh', 'fried-rice', 'stir-fry', 'seasoning']
+    tags: ['onions', 'vegetables', 'cooking', 'fresh', 'fried-rice', 'stir-fry', 'seasoning'],
+    videoUrl: 'https://www.youtube.com/watch?v=1u2k2r2xR20'
   },
 
   // Skincare
@@ -90,7 +93,7 @@ export const products: Product[] = [
     description: 'Oil-free cleanser for oily and combination skin',
     longDescription: 'Dermatologist-tested face wash with salicylic acid and niacinamide. Removes excess oil without over-drying, helps prevent breakouts, and leaves skin feeling clean and refreshed.',
     price: 1249,
-    image: 'https://i5.walmartimages.com/seo/Cetaphil-Face-Wash-Hydrating-Gentle-Skin-Cleanser-for-Dry-to-Normal-Sensitive-Skin-16-oz_b6481e8f-7b0d-4d17-8b13-d30f1ca2184b.5693cce355ba9ec34f47b5e3dda92924.jpeg?odnHeight=640&odnWidth=640&odnBg=FFFFFF',
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=800&q=80',
     category: 'Skincare',
     sentiment: {
       positive: 85,
@@ -112,7 +115,7 @@ export const products: Product[] = [
     description: 'Insulated winter jacket with hood, perfect for cold weather',
     longDescription: 'Premium down-filled puffer jacket with waterproof outer shell. Features adjustable hood, multiple pockets, and wind-resistant design. Rated for temperatures down to -20°F.',
     price: 2500,
-    image: 'https://i5.walmartimages.com/seo/IWEMEK-Womens-Puffer-Jackets-Fall-Coat-for-Women-Going-Out-Baggy-Outerwear-Workout-Warm-Snow-Jacket-High-Collar-Red-Coats_0ee81ba5-a0df-44f3-8402-2a6fff177211.af972668849d283e29438ecf7a1f2abb.jpeg?odnHeight=640&odnWidth=640&odnBg=FFFFFF',
+    image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?auto=format&fit=crop&w=800&q=80',
     category: 'Clothing',
     sentiment: {
       positive: 92,
@@ -1538,9 +1541,8 @@ export const products: Product[] = [
       positive: 94,
       negative: 6,
       aspects: {
-        sound: 96,
-        comfort: 93,
-        battery: 95
+        quality: 92,
+        comfort: 90
       }
     },
     dataAiHint: 'headphones',

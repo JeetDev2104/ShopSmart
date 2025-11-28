@@ -1,7 +1,7 @@
 // Mock Gemini AI Service - In production, this would integrate with actual Google Gemini API
 export class GeminiService {
   private static instance: GeminiService;
-  private baseUrl = "http://localhost:8000"; // Python FastAPI service
+  private baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000"; // Python FastAPI service
 
   public static getInstance(): GeminiService {
     if (!GeminiService.instance) {
@@ -12,7 +12,9 @@ export class GeminiService {
 
   async getProducts() {
     try {
-      const response = await fetch(`${this.baseUrl}/products`);
+      const response = await fetch(`${this.baseUrl}/products`, {
+        headers: { "ngrok-skip-browser-warning": "true" }
+      });
       if (!response.ok) throw new Error("Failed to fetch products");
       return await response.json();
     } catch (error) {
@@ -24,7 +26,10 @@ export class GeminiService {
   async searchProducts(query: string) {
     const response = await fetch(`${this.baseUrl}/ai-search`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true"
+      },
       body: JSON.stringify({ query }),
     });
     if (!response.ok) throw new Error("Failed to search products");
@@ -46,7 +51,10 @@ export class GeminiService {
     
     const response = await fetch(`${this.baseUrl}/product-qa`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true"
+      },
       body: JSON.stringify({
         query: userQuestion,
         product: {
@@ -77,7 +85,10 @@ export class GeminiService {
   async analyzeReview(reviewText: string, currentSentiment: any) {
     const response = await fetch(`${this.baseUrl}/analyze-review`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true"
+      },
       body: JSON.stringify({ reviewText, currentSentiment }),
     });
     if (!response.ok) throw new Error("Failed to analyze review");
@@ -139,7 +150,10 @@ export class GeminiService {
     try {
       const response = await fetch(`${this.baseUrl}/detect-intent`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true"
+        },
         body: JSON.stringify({ 
           query,
           availableProducts 
@@ -174,7 +188,10 @@ export class GeminiService {
     try {
       const response = await fetch(`${this.baseUrl}/recipe-details`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true"
+        },
         body: JSON.stringify({ query }),
       });
 

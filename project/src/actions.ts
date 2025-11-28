@@ -400,9 +400,13 @@ export async function aiProductQA(
   if (!product) throw new Error("Product not found");
 
   // Always delegate to Python AI service with full product context
-  const resp = await fetch("http://localhost:8000/product-qa", {
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const resp = await fetch(`${apiUrl}/product-qa`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    },
     body: JSON.stringify({
       productName: product.name,
       productDescription: product.longDescription ?? product.description ?? "",

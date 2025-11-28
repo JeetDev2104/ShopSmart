@@ -35,6 +35,7 @@ export interface Product {
   };
   dataAiHint: string;
   tags?: string[];
+  videoUrl?: string;
 }
 
 export interface CartItem {

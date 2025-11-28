@@ -13,6 +13,7 @@ import RecommendationPanel from "./components/RecommendationPanel";
 import RecipeShoppingList from "./components/RecipeShoppingList";
 import AISearchLoader from "./components/AISearchLoader";
 import AgenticPopup from "./components/AgenticPopup";
+import MealPlanner from "./components/MealPlanner";
 import { useCart } from "./hooks/useCart";
 // import { products } from "./data/products"; // Removed static import
 import { Product, SearchIntent, RecipeDetails } from "./types";
@@ -34,6 +35,7 @@ function App() {
   // Indicates whether the user has performed at least one search during the current session
   const [hasSearched, setHasSearched] = useState(false);
   const [recipeDetails, setRecipeDetails] = useState<RecipeDetails | null>(null);
+  const [isMealPlannerOpen, setIsMealPlannerOpen] = useState(false);
   
   // Agentic Workflow State
   const [showAgenticPopup, setShowAgenticPopup] = useState(false);
@@ -316,18 +318,61 @@ function App() {
     openCheckout();
   };
 
+  const [darkMode, setDarkMode] = useState(false);
+
+
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    if (!darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  const handleSmartReorder = () => {
+    // Mock reordering logic
+    const essentials = products.filter(p => ['1', '2', '3'].includes(p.id)); // Rice, Soy Sauce, Veggies
+    essentials.forEach(p => addToCart(p, 1));
+    alert("Reordered your weekly essentials! 🛒");
+  };
+
+  const handleMealPlan = () => {
+    setIsMealPlannerOpen(true);
+  };
+
   // Agentic Workflow Handlers
-  const handleAgenticStart = () => {
-    setShowAgenticPopup(false);
+  const handleAgenticStart = async (alternativeProduct?: Product) => {
     setIsAgenticMode(true);
+    setShowAgenticPopup(false);
     
     // Add all found items to cart
     if (searchResults.length > 0) {
       searchResults.forEach((product) => addToCart(product, 1));
     }
+
+    // Add alternative if provided
+    if (alternativeProduct) {
+      addToCart(alternativeProduct, 1);
+    }
     
     // Open checkout immediately
     openCheckout();
+  };
+
+  const handleFindAlternative = async (missingItem: string): Promise<Product | null> => {
+    try {
+      // Search for alternatives using the missing item name
+      const results = await geminiService.searchProducts(missingItem);
+      // Filter out items that are definitely not the right category if possible, 
+      // but for now just return the top result that isn't already in the search results
+      const validResults = results.filter(r => !searchResults.some(s => s.id === r.id));
+      return validResults.length > 0 ? validResults[0] : results[0] || null;
+    } catch (error) {
+      console.error("Error finding alternative:", error);
+      return null;
+    }
   };
 
   const handleAgenticCancel = () => {
@@ -382,12 +427,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'} transition-colors duration-200`}>
       {/* Header */}
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="bg-[#0071dc] text-white sticky top-0 z-40 shadow-sm"
+        className="bg-[#0071dc] dark:bg-gray-800 text-white sticky top-0 z-40 shadow-sm transition-colors duration-200"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
@@ -419,26 +464,41 @@ function App() {
               </div>
             </motion.div>
 
-            <motion.button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2 bg-transparent hover:bg-blue-600 rounded-md transition-colors flex items-center gap-1"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <ShoppingCart className="w-5 h-5" />
-              <span className="hidden sm:inline text-sm font-medium">Cart</span>
-              {getTotalItems() > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 bg-yellow-400 text-blue-900 text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center"
-                >
-                  {getTotalItems()}
-                </motion.span>
-              )}
-            </motion.button>
+            <div className="flex items-center gap-4">
+              {/* New Feature Buttons */}
+              <button onClick={handleSmartReorder} className="text-sm font-medium hover:text-yellow-300 hidden md:block" title="Smart Reorder">
+                🔄 Reorder
+              </button>
+              <button onClick={handleMealPlan} className="text-sm font-medium hover:text-yellow-300 hidden md:block" title="Meal Planner">
+                📅 Meal Plan
+              </button>
+              
+              {/* Dark Mode Toggle */}
+              <button onClick={toggleDarkMode} className="p-2 hover:bg-white/10 rounded-full" title="Toggle Dark Mode">
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+
+              <motion.button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 bg-transparent hover:bg-blue-600 dark:hover:bg-gray-700 rounded-md transition-colors flex items-center gap-1"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span className="hidden sm:inline text-sm font-medium">Cart</span>
+                {getTotalItems() > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 bg-yellow-400 text-blue-900 text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    {getTotalItems()}
+                  </motion.span>
+                )}
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.header>
@@ -649,7 +709,22 @@ function App() {
         isOpen={showAgenticPopup}
         onConfirm={handleAgenticStart}
         onCancel={handleAgenticCancel}
+        recipeIngredients={recipeDetails?.ingredients || []}
+        foundProducts={searchResults.map(p => p.name)}
+        onFindAlternative={handleFindAlternative}
       />
+
+      {/* Meal Planner Modal */}
+      <AnimatePresence>
+        {isMealPlannerOpen && (
+          <MealPlanner
+            isOpen={isMealPlannerOpen}
+            onClose={() => setIsMealPlannerOpen(false)}
+            onAddToCart={addToCart}
+            products={products}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
